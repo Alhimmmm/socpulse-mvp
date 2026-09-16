@@ -137,7 +137,7 @@ st.markdown(
        narrow viewport and let Streamlit's sidebar stay collapsible. */
     @media (max-width: 680px) {{
         .block-container {{
-            padding: .75rem .8rem 1.5rem;
+            padding: 4.25rem .8rem 1.5rem;
             max-width: 100%;
         }}
         [data-testid="stImage"] img {{ max-height: 160px; }}
@@ -184,18 +184,26 @@ st.markdown(
             width: 100% !important;
         }}
         .st-key-brand-header [data-testid="stHorizontalBlock"] {{
-            flex-wrap: nowrap;
-            gap: .7rem;
+            display: block;
         }}
         .st-key-brand-header [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {{
-            flex: 0 0 78px !important;
-            min-width: 78px !important;
-            width: 78px !important;
+            display: none;
         }}
         .st-key-brand-header [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {{
-            flex: 1 1 0 !important;
-            min-width: 0 !important;
-            width: auto !important;
+            display: block;
+            flex: none !important;
+            min-width: 100% !important;
+            width: 100% !important;
+        }}
+        .st-key-brand-header .brand-hero {{
+            width: 100%;
+            margin: 0 0 .85rem;
+            padding: 1.05rem;
+            overflow: hidden;
+        }}
+        .st-key-brand-header .brand-title {{
+            padding-top: .08rem;
+            line-height: 1.25;
         }}
         div[data-baseweb="tab-list"] {{
             overflow-x: auto;
@@ -211,6 +219,7 @@ st.markdown(
         [data-testid="stDataFrame"] {{ border-radius: 10px; overflow-x: auto; }}
         .section-note {{ padding: .75rem .8rem; font-size: .92rem; line-height: 1.45; }}
         .brand-footer {{ margin-top: 1.25rem; font-size: .75rem; line-height: 1.45; }}
+        [data-testid="stToolbar"] {{ display: none !important; }}
     }}
     </style>
     """,
