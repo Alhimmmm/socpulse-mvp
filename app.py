@@ -13,6 +13,7 @@ from src.analytics import enrich_programs, portfolio_metrics, program_context, v
 from src.prompts import analysis_messages, question_messages
 
 BASE_DIR = Path(__file__).resolve().parent
+LOGO_PATH = BASE_DIR / "assets" / "socialnavigator-ai-logo.png"
 BRAND_NAVY = "#083B73"
 BRAND_BLUE = "#0B78C4"
 BRAND_CYAN = "#05BFD1"
@@ -64,7 +65,18 @@ st.markdown(
       --cyan: {BRAND_CYAN};
       --pale: {BRAND_PALE};
     }}
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {{
+        font-family: "Segoe UI", "Arial", sans-serif;
+    }}
     .block-container {{ padding-top: 1.25rem; padding-bottom: 2.5rem; max-width: 1450px; }}
+    [data-testid="stImage"] img {{
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 235px;
+        object-fit: contain !important;
+        object-position: center;
+    }}
     #MainMenu, footer {{ visibility: hidden; }}
     [data-testid="stSidebar"] {{ border-right: 1px solid rgba(8,59,115,.10); }}
     [data-testid="stMetric"] {{
@@ -161,9 +173,8 @@ def status_card(label: str, value: str, color: str = BRAND_NAVY) -> None:
 
 
 with st.sidebar:
-    logo_path = BASE_DIR / "assets" / "logo.png"
-    if logo_path.exists():
-        st.image(str(logo_path), use_container_width=True)
+    if LOGO_PATH.exists():
+        st.image(str(LOGO_PATH), width="stretch")
     else:
         st.markdown("## 🧭 СоцНавигаторAI")
         st.caption("Курс на результат без отклонений")
@@ -182,7 +193,7 @@ with st.sidebar:
     has_credentials = bool(os.getenv("GIGACHAT_AUTH_KEY"))
     st.caption("Авторизация: " + ("настроена" if has_credentials else "не настроена"))
 
-    if st.button("Проверить подключение", use_container_width=True):
+    if st.button("Проверить подключение", width="stretch"):
         try:
             with st.spinner("Проверяю GigaChat API..."):
                 models = get_gigachat_client().check_connection()
@@ -195,20 +206,24 @@ with st.sidebar:
     st.divider()
     st.caption("MVP · Streamlit · GigaChat · Explainable risk")
 
-st.markdown(
-    """
-    <div class="brand-hero">
-      <div class="brand-title">СоцНавигатор<span class="brand-ai">AI</span></div>
-      <div class="brand-slogan">Курс на результат без отклонений</div>
-      <div class="brand-subtitle">Цифровой мониторинг социальных программ: план/факт, раннее выявление риска и управленческая аналитика через GigaChat.</div>
-      <span class="chip">🧭 мониторинг курса</span>
-      <span class="chip">📊 план / факт</span>
-      <span class="chip">⚠️ ранний риск</span>
-      <span class="chip">✨ GigaChat-аналитик</span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+brand_mark, brand_copy = st.columns([1.15, 4], gap="large", vertical_alignment="center")
+with brand_mark:
+    st.image(str(LOGO_PATH), width="stretch")
+with brand_copy:
+    st.markdown(
+        """
+        <div class="brand-hero">
+          <div class="brand-title">СоцНавигатор<span class="brand-ai">AI</span></div>
+          <div class="brand-slogan">Курс на результат без отклонений</div>
+          <div class="brand-subtitle">Цифровой мониторинг социальных программ: план/факт, раннее выявление риска и управленческая аналитика через GigaChat.</div>
+          <span class="chip">🧭 мониторинг курса</span>
+          <span class="chip">📊 план / факт</span>
+          <span class="chip">⚠️ ранний риск</span>
+          <span class="chip">✨ GigaChat-аналитик</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 try:
     source = load_source(uploaded)
@@ -261,7 +276,7 @@ with tab_overview:
         )
         fig.update_xaxes(tickangle=-18, gridcolor="rgba(8,59,115,.05)")
         fig.update_yaxes(gridcolor="rgba(8,59,115,.08)")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with right:
         status_counts = data["status"].value_counts().rename_axis("Статус").reset_index(name="Количество")
@@ -279,7 +294,7 @@ with tab_overview:
             margin=dict(l=10, r=10, t=55, b=10),
             showlegend=True,
         )
-        st.plotly_chart(fig_status, use_container_width=True)
+        st.plotly_chart(fig_status, width="stretch")
 
     st.subheader("Приоритет внимания")
     risk_view = data[["name", "region", "status", "risk_score", "delivery_progress", "schedule_progress", "budget_progress"]].copy()
@@ -291,7 +306,7 @@ with tab_overview:
     ).sort_values(["Риск-балл", "Результат, %"], ascending=[False, True])
     st.dataframe(
         risk_view,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "Результат, %": st.column_config.ProgressColumn("Результат", min_value=0, max_value=100, format="%.0f%%"),
@@ -355,7 +370,7 @@ with tab_programs:
         margin=dict(l=10, r=10, t=25, b=10),
     )
     fig_detail.update_yaxes(gridcolor="rgba(8,59,115,.08)")
-    st.plotly_chart(fig_detail, use_container_width=True)
+    st.plotly_chart(fig_detail, width="stretch")
 
     lag_pp = float(row["lag"]) * 100
     budget_gap_pp = float(row["budget_efficiency_gap"]) * 100
@@ -384,7 +399,7 @@ with tab_ai:
 
     st.info("В GigaChat передаётся только агрегированная карточка выбранной программы — без персональных данных граждан.")
 
-    if st.button("✨ Сформировать аналитическую записку", type="primary", use_container_width=True):
+    if st.button("✨ Сформировать аналитическую записку", type="primary", width="stretch"):
         try:
             with st.spinner("GigaChat анализирует показатели и отклонения..."):
                 response = get_gigachat_client().chat(analysis_messages(context))
@@ -406,17 +421,17 @@ with tab_ai:
             data=result["text"].encode("utf-8"),
             file_name=f"socnavigator_{program_id}_analysis.md",
             mime="text/markdown",
-            use_container_width=True,
+            width="stretch",
         )
 
     st.divider()
     st.markdown("#### Быстрые вопросы для демонстрации")
     q1, q2, q3 = st.columns(3)
-    if q1.button("Почему программа в зоне риска?", use_container_width=True):
+    if q1.button("Почему программа в зоне риска?", width="stretch"):
         st.session_state["ai_question"] = "Почему программа находится в текущей зоне риска? Назови показатели, которые сильнее всего на это влияют."
-    if q2.button("Есть ли дисбаланс бюджета?", use_container_width=True):
+    if q2.button("Есть ли дисбаланс бюджета?", width="stretch"):
         st.session_state["ai_question"] = "Есть ли дисбаланс между освоением бюджета и фактическим результатом? Объясни по цифрам."
-    if q3.button("Что проверить руководителю?", use_container_width=True):
+    if q3.button("Что проверить руководителю?", width="stretch"):
         st.session_state["ai_question"] = "Какие три вещи руководителю стоит проверить в первую очередь по этой программе?"
 
     question = st.text_input(
@@ -424,7 +439,7 @@ with tab_ai:
         key="ai_question",
         placeholder="Например: за счёт чего сформировалось отклонение?",
     )
-    if st.button("Спросить GigaChat", disabled=not question.strip(), use_container_width=True):
+    if st.button("Спросить GigaChat", disabled=not question.strip(), width="stretch"):
         try:
             with st.spinner("GigaChat формирует ответ..."):
                 response = get_gigachat_client().chat(question_messages(context, question.strip()))
@@ -437,7 +452,7 @@ with tab_ai:
 with tab_data:
     st.subheader("Исходные данные")
     st.caption("Данные демонстрационные. Для своего сценария можно загрузить CSV того же формата через боковую панель.")
-    st.dataframe(source, use_container_width=True, hide_index=True)
+    st.dataframe(source, width="stretch", hide_index=True)
     st.download_button(
         "Скачать демонстрационный CSV",
         data=(BASE_DIR / "data" / "sample_programs.csv").read_bytes(),
