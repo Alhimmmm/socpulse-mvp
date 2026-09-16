@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import textwrap
 from pathlib import Path
 
 import pandas as pd
@@ -132,6 +133,7 @@ st.markdown(
     .brand-footer {{ text-align: center; color: #718697; font-size: .82rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(11,120,196,.10); }}
     div[data-baseweb="tab-list"] {{ gap: .25rem; }}
     button[data-baseweb="tab"] {{ border-radius: 12px 12px 0 0; }}
+    .st-key-portfolio-chart-mobile {{ display: none; }}
 
     /* Phone layout. Desktop keeps the styles above; these rules apply only to a
        narrow viewport and let Streamlit's sidebar stay collapsible. */
@@ -220,6 +222,8 @@ st.markdown(
         .section-note {{ padding: .75rem .8rem; font-size: .92rem; line-height: 1.45; }}
         .brand-footer {{ margin-top: 1.25rem; font-size: .75rem; line-height: 1.45; }}
         [data-testid="stToolbar"] {{ display: none !important; }}
+        .st-key-portfolio-chart-desktop {{ display: none; }}
+        .st-key-portfolio-chart-mobile {{ display: block; }}
     }}
     </style>
     """,
@@ -365,7 +369,47 @@ with tab_overview:
         )
         fig.update_xaxes(tickangle=-18, gridcolor="rgba(8,59,115,.05)")
         fig.update_yaxes(gridcolor="rgba(8,59,115,.08)")
-        st.plotly_chart(fig, width="stretch")
+        st.container(key="portfolio-chart-desktop").plotly_chart(
+            fig,
+            width="stretch",
+            config={"displayModeBar": False, "responsive": True},
+        )
+
+        mobile_chart_df = chart_df.sort_values("Результат, %", ascending=True).copy()
+        mobile_chart_df["Программа"] = mobile_chart_df["name"].map(
+            lambda value: "<br>".join(textwrap.wrap(str(value), width=22, max_lines=2, placeholder="…"))
+        )
+        mobile_fig = px.bar(
+            mobile_chart_df,
+            y="Программа",
+            x=["Результат, %", "Ход периода, %"],
+            orientation="h",
+            barmode="group",
+            color_discrete_sequence=[BRAND_BLUE, "#A9D8EA"],
+            custom_data=["name"],
+        )
+        mobile_fig.update_traces(
+            hovertemplate="%{customdata[0]}<br>%{fullData.name}: %{x:.0f}%<extra></extra>"
+        )
+        mobile_fig.update_layout(
+            height=max(430, len(mobile_chart_df) * 58 + 120),
+            legend_title_text="",
+            legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
+            xaxis_title="Выполнение, %",
+            yaxis_title="",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=5, r=8, t=48, b=35),
+        )
+        mobile_fig.update_xaxes(range=[0, 105], gridcolor="rgba(8,59,115,.08)", fixedrange=True)
+        mobile_fig.update_yaxes(automargin=True, fixedrange=True)
+        mobile_chart = st.container(key="portfolio-chart-mobile")
+        mobile_chart.markdown("#### Результат и ход реализации")
+        mobile_chart.plotly_chart(
+            mobile_fig,
+            width="stretch",
+            config={"displayModeBar": False, "responsive": True},
+        )
 
     with right:
         status_counts = data["status"].value_counts().rename_axis("Статус").reset_index(name="Количество")
@@ -383,7 +427,11 @@ with tab_overview:
             margin=dict(l=10, r=10, t=55, b=10),
             showlegend=True,
         )
-        st.plotly_chart(fig_status, width="stretch")
+        st.plotly_chart(
+            fig_status,
+            width="stretch",
+            config={"displayModeBar": False, "responsive": True},
+        )
 
     st.subheader("Приоритет внимания")
     risk_view = data[["name", "region", "status", "risk_score", "delivery_progress", "schedule_progress", "budget_progress"]].copy()
@@ -459,7 +507,11 @@ with tab_programs:
         margin=dict(l=10, r=10, t=25, b=10),
     )
     fig_detail.update_yaxes(gridcolor="rgba(8,59,115,.08)")
-    st.plotly_chart(fig_detail, width="stretch")
+    st.plotly_chart(
+        fig_detail,
+        width="stretch",
+        config={"displayModeBar": False, "responsive": True},
+    )
 
     lag_pp = float(row["lag"]) * 100
     budget_gap_pp = float(row["budget_efficiency_gap"]) * 100
