@@ -155,20 +155,47 @@ st.markdown(
         .brand-subtitle {{ font-size: .92rem; line-height: 1.45; }}
         .brand-slogan {{ font-size: .93rem; line-height: 1.35; }}
         .chip {{ font-size: .72rem; padding: .22rem .45rem; }}
-        [data-testid="stHorizontalBlock"] {{
+        /* Only the rows named below reflow. Applying this to every Streamlit
+           horizontal block also affected the header, controls and charts. */
+        .st-key-portfolio-metrics [data-testid="stHorizontalBlock"],
+        .st-key-program-status [data-testid="stHorizontalBlock"],
+        .st-key-program-metrics [data-testid="stHorizontalBlock"],
+        .st-key-ai-metrics [data-testid="stHorizontalBlock"] {{
             flex-wrap: wrap;
             gap: .65rem;
         }}
-        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+        .st-key-portfolio-metrics [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        .st-key-program-status [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        .st-key-program-metrics [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        .st-key-ai-metrics [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
             flex: 1 1 calc(50% - .325rem) !important;
             min-width: calc(50% - .325rem) !important;
             width: calc(50% - .325rem) !important;
         }}
-        /* Charts and their legend need the whole row on a narrow screen. */
-        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:only-child {{
-            flex-basis: 100% !important;
+        .st-key-overview-charts [data-testid="stHorizontalBlock"],
+        .st-key-quick-questions [data-testid="stHorizontalBlock"] {{
+            flex-direction: column;
+            gap: .85rem;
+        }}
+        .st-key-overview-charts [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        .st-key-quick-questions [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            flex: 1 1 100% !important;
             min-width: 100% !important;
             width: 100% !important;
+        }}
+        .st-key-brand-header [data-testid="stHorizontalBlock"] {{
+            flex-wrap: nowrap;
+            gap: .7rem;
+        }}
+        .st-key-brand-header [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {{
+            flex: 0 0 78px !important;
+            min-width: 78px !important;
+            width: 78px !important;
+        }}
+        .st-key-brand-header [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {{
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            width: auto !important;
         }}
         div[data-baseweb="tab-list"] {{
             overflow-x: auto;
@@ -259,7 +286,7 @@ with st.sidebar:
     st.divider()
     st.caption("MVP · Streamlit · GigaChat · Explainable risk")
 
-brand_mark, brand_copy = st.columns([1.15, 4], gap="large", vertical_alignment="center")
+brand_mark, brand_copy = st.container(key="brand-header").columns([1.15, 4], gap="large", vertical_alignment="center")
 with brand_mark:
     st.image(str(LOGO_PATH), width="stretch")
 with brand_copy:
@@ -291,7 +318,7 @@ except Exception as exc:
 
 metrics = portfolio_metrics(data)
 
-c1, c2, c3, c4, c5 = st.columns(5)
+c1, c2, c3, c4, c5 = st.container(key="portfolio-metrics").columns(5)
 c1.metric("Программ", metrics["programs"])
 c2.metric("Высокий риск", metrics["high_risk"])
 c3.metric("Требуют внимания", metrics["attention"])
@@ -305,7 +332,7 @@ tab_overview, tab_programs, tab_ai, tab_data = st.tabs(
 )
 
 with tab_overview:
-    left, right = st.columns([1.55, 1])
+    left, right = st.container(key="overview-charts").columns([1.55, 1])
     chart_df = data.copy()
     chart_df["Результат, %"] = (chart_df["delivery_progress"] * 100).round(1)
     chart_df["Ход периода, %"] = (chart_df["schedule_progress"] * 100).round(1)
@@ -376,7 +403,7 @@ with tab_programs:
     st.subheader(selected_name)
     st.caption(f"{row['region']} · {row['start_date'].date().isoformat()} — {row['end_date'].date().isoformat()}")
 
-    s1, s2, s3, s4 = st.columns(4)
+    s1, s2, s3, s4 = st.container(key="program-status").columns(4)
     with s1:
         status_card("Статус", str(row["status"]), status_color)
     with s2:
@@ -387,7 +414,7 @@ with tab_programs:
         status_card("Риск-балл", str(int(row["risk_score"])), status_color)
 
     st.write("")
-    b1, b2, b3 = st.columns(3)
+    b1, b2, b3 = st.container(key="program-metrics").columns(3)
     b1.metric("Бюджет", money(row["budget_actual"]), f"из {money(row['budget_plan'])}", delta_color="off")
     b2.metric(
         "Получатели",
@@ -444,7 +471,7 @@ with tab_ai:
     context = program_context(ai_row)
     program_id = str(ai_row["program_id"])
 
-    a1, a2, a3, a4 = st.columns(4)
+    a1, a2, a3, a4 = st.container(key="ai-metrics").columns(4)
     a1.metric("Статус", ai_row["status"])
     a2.metric("Результат", f"{ai_row['delivery_progress'] * 100:.0f}%")
     a3.metric("Ход периода", f"{ai_row['schedule_progress'] * 100:.0f}%")
@@ -479,7 +506,7 @@ with tab_ai:
 
     st.divider()
     st.markdown("#### Быстрые вопросы для демонстрации")
-    q1, q2, q3 = st.columns(3)
+    q1, q2, q3 = st.container(key="quick-questions").columns(3)
     if q1.button("Почему программа в зоне риска?", width="stretch"):
         st.session_state["ai_question"] = "Почему программа находится в текущей зоне риска? Назови показатели, которые сильнее всего на это влияют."
     if q2.button("Есть ли дисбаланс бюджета?", width="stretch"):
