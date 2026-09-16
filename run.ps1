@@ -9,7 +9,7 @@ python -m pip install -r requirements.txt
 
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"
-    Write-Host "Создан .env. Укажите GIGACHAT_AUTH_KEY или GC_TOKEN и запустите скрипт еще раз." -ForegroundColor Yellow
+    Write-Host "Создан .env. Укажите GIGACHAT_AUTH_KEY и запустите скрипт еще раз." -ForegroundColor Yellow
     exit 0
 }
 
