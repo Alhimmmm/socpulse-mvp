@@ -132,6 +132,59 @@ st.markdown(
     .brand-footer {{ text-align: center; color: #718697; font-size: .82rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(11,120,196,.10); }}
     div[data-baseweb="tab-list"] {{ gap: .25rem; }}
     button[data-baseweb="tab"] {{ border-radius: 12px 12px 0 0; }}
+
+    /* Phone layout. Desktop keeps the styles above; these rules apply only to a
+       narrow viewport and let Streamlit's sidebar stay collapsible. */
+    @media (max-width: 680px) {{
+        .block-container {{
+            padding: .75rem .8rem 1.5rem;
+            max-width: 100%;
+        }}
+        [data-testid="stImage"] img {{ max-height: 160px; }}
+        [data-testid="stMetric"] {{
+            border-radius: 13px;
+            padding: .65rem .7rem;
+        }}
+        [data-testid="stMetricValue"] {{ font-size: 1.35rem; }}
+        .brand-hero {{
+            padding: 1rem;
+            border-radius: 16px;
+        }}
+        .brand-hero:after {{ width: 170px; height: 170px; right: -95px; top: -90px; }}
+        .brand-title {{ font-size: 1.6rem; line-height: 1.1; }}
+        .brand-subtitle {{ font-size: .92rem; line-height: 1.45; }}
+        .brand-slogan {{ font-size: .93rem; line-height: 1.35; }}
+        .chip {{ font-size: .72rem; padding: .22rem .45rem; }}
+        [data-testid="stHorizontalBlock"] {{
+            flex-wrap: wrap;
+            gap: .65rem;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            flex: 1 1 calc(50% - .325rem) !important;
+            min-width: calc(50% - .325rem) !important;
+            width: calc(50% - .325rem) !important;
+        }}
+        /* Charts and their legend need the whole row on a narrow screen. */
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:only-child {{
+            flex-basis: 100% !important;
+            min-width: 100% !important;
+            width: 100% !important;
+        }}
+        div[data-baseweb="tab-list"] {{
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            scrollbar-width: thin;
+        }}
+        button[data-baseweb="tab"] {{
+            flex: 0 0 auto;
+            padding-left: .65rem;
+            padding-right: .65rem;
+            white-space: nowrap;
+        }}
+        [data-testid="stDataFrame"] {{ border-radius: 10px; overflow-x: auto; }}
+        .section-note {{ padding: .75rem .8rem; font-size: .92rem; line-height: 1.45; }}
+        .brand-footer {{ margin-top: 1.25rem; font-size: .75rem; line-height: 1.45; }}
+    }}
     </style>
     """,
     unsafe_allow_html=True,
